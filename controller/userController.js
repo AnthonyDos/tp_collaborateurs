@@ -6,6 +6,7 @@ const errorMessage = require("../httpRequestMessage/errorMessage");
 const { REGEX_PASSWORD, REGEX_EMAIL } = require("../config/regex/regex");
 const { SALT_BCRYPT, EXPIRE_TOKEN } = require("../config/properties");
 const usersService = require("../service/usersService");
+const { end } = require("../config/access_db");
 
 
 exports.createUser = async(req,res) => {
@@ -114,5 +115,19 @@ exports.getAllUsers = (req, res) => {
             message: "récupération de la liste utilisateur avec succés", 
             nombreUser: result.length
         })
+    })
+}
+
+exports.getUserById = (req, res) => {
+    const userId = req.params.id;
+    console.log(userId)
+    dbConnect.query(usersService.getUserById, [userId], (error,result)=> {
+        console.log(result[0])
+        if (result[0] !== undefined ) {
+            console.log(error)
+            res.status(201).json({ result: result[0], message: "Utilisateur trouvé"})
+        } else{
+            res.status(400).json({ error: error, message: errorMessage.errorUserNotExist })
+        }
     })
 }
