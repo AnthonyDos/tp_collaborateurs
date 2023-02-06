@@ -12,3 +12,4 @@ exports.errorConnectionUser = "L'adresse email n existe pas ou l'utilisateur est
 //users
 exports.errorGetAllUsers = "la récupération de la liste utilisateurs à échouée!";
 exports.errorUserNotExist = "l'utilisateur n'existe pas en base de données!";
+exports.errorUpdateUser = "la modification de l'utilisateur à échouée!";

@@ -120,12 +120,44 @@ exports.getAllUsers = (req, res) => {
 
 exports.getUserById = (req, res) => {
     const userId = req.params.id;
-    console.log(userId)
+    
     dbConnect.query(usersService.getUserById, [userId], (error,result)=> {
-        console.log(result[0])
         if (result[0] !== undefined ) {
-            console.log(error)
             res.status(201).json({ result: result[0], message: "Utilisateur trouvé"})
+        } else{
+            res.status(400).json({ error: error, message: errorMessage.errorUserNotExist })
+        }
+    })
+}
+
+exports.updateUser = (req, res) => {
+    const userId = req.params.id;
+    const { gender, firstname, lastname, password, phone, birthdate, city, country, photo, category, isAdmin } = req.body;
+
+    dbConnect.query(usersService.getUserById, [userId], (error, result)=> {
+        const user = result[0];
+        if (result[0] !== undefined ) {
+            dbConnect.query(usersService.updateUser, [
+                gender != undefined ? gender : user.gender,
+                firstname != undefined ? firstname : user.firstname,
+                lastname != undefined ? lastname : user.lastname,
+                user.email,
+                password != undefined ? password : user.password,
+                phone != undefined ? phone : user.phone,
+                birthdate != undefined ? birthdate : user.birthdate,
+                city != undefined ? city : user.city,
+                country != undefined ? country : user.country,
+                photo != undefined ? photo : user.photo,
+                category != undefined ? category : user.category,
+                isAdmin != undefined ? isAdmin : user.isAdmin,
+                userId
+            ], (error, result)=> {
+                if (error) {
+                    res.status(400).json({ error: error, message: errorMessage.errorUpdateUser })
+                } else {
+                    res.status(201).json({result: result, message: "la modification de l'utilisateur est prise en compte!"})
+                }
+            })
         } else{
             res.status(400).json({ error: error, message: errorMessage.errorUserNotExist })
         }
