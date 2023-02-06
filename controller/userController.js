@@ -9,7 +9,6 @@ const usersService = require("../service/usersService");
 
 
 exports.createUser = async(req,res) => {
-    //const encryptedPassword = await bcrypt.hash(req.body.password, 10);
     const passwordBody = req.body.password;
     const email = req.body.email;
 
@@ -23,7 +22,7 @@ exports.createUser = async(req,res) => {
                 res.status(401).json({err: err})
             }else {
                 if (result[0] != undefined) {
-                    res.status(409).json({err: err, message: errorMessage.errorEmailAlreadyExist})
+                    res.status(409).json({ message: errorMessage.errorEmailAlreadyExist })
                 }else {
                     dbConnect.query(usersService.createUser,
                         [
@@ -102,5 +101,18 @@ exports.userLogin = async (req, res) => {
                 })
             }
         }
+    })
+}
+
+exports.getAllUsers = (req, res) => {
+    dbConnect.query(usersService.getAllUsers, (error, result)=> {
+        if (error) {
+            res.status(400).json({ error : error, message: errorMessage.errorGetAllUsers })
+        }
+        res.status(201).json({ 
+            result : result, 
+            message: "récupération de la liste utilisateur avec succés", 
+            nombreUser: result.length
+        })
     })
 }
