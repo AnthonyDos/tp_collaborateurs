@@ -4,9 +4,8 @@ require("dotenv").config();
 const dbConnect = require("../config/access_db");
 const errorMessage = require("../httpRequestMessage/errorMessage");
 const { REGEX_PASSWORD, REGEX_EMAIL } = require("../config/regex/regex");
-const { SALT_BCRYPT, EXPIRE_TOKEN } = require("../config/properties");
+const { SALT_BCRYPT, EXPIRE_TOKEN, AUTHORIZATION } = require("../config/properties");
 const usersService = require("../service/usersService");
-const { end } = require("../config/access_db");
 
 
 exports.createUser = async(req,res) => {
@@ -98,7 +97,8 @@ exports.userLogin = async (req, res) => {
                         process.env.JWT_TOKEN,
                         { expiresIn: EXPIRE_TOKEN }
                     ),
-                    success: "le client est connecté"
+                    success: "le client est connecté",
+                    authorization: result[0].isAdmin
                 })
             }
         }
@@ -162,4 +162,20 @@ exports.updateUser = (req, res) => {
             res.status(400).json({ error: error, message: errorMessage.errorUserNotExist })
         }
     })
+}
+
+exports.deleteUser = (req,res) => {
+    const authorization = req.body.authorization;
+    
+    if (authorization === AUTHORIZATION) {
+        dbConnect.query(usersService.deleteUser, [req.params.id],(error, result) => {
+            if (error) {
+                res.status(404).json({ error: error, message: errorMessage.errorDeleteUser })
+            }else{
+                res.status(200).json({success: "supprimé"})
+            }
+        })
+    }else{
+        res.status(401).json({ message: errorMessage.errorAccessAuthorization })
+    }
 }
