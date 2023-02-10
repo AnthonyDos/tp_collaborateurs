@@ -109,6 +109,7 @@ exports.userLogin = async (req, res) => {
 exports.getAllUsers = (req, res) => {
     dbConnect.query(usersService.getAllUsers, (error, result)=> {
         if (error) {
+            console.log({error: error})
             res.status(400).json({ error : error, message: errorMessage.errorGetAllUsers })
         }
         res.status(201).json({ 
@@ -133,34 +134,19 @@ exports.getUserById = (req, res) => {
 
 exports.updateUser = (req, res) => {
     const userId = req.params.id;
-    const { gender, firstname, lastname, password, phone, birthdate, city, country, photo, category, isAdmin } = req.body;
-
-    dbConnect.query(usersService.getUserById, [userId], (error, result)=> {
-        const user = result[0];
-        if (result[0] !== undefined ) {
-            dbConnect.query(usersService.updateUser, [
-                gender != undefined ? gender : user.gender,
-                firstname != undefined ? firstname : user.firstname,
-                lastname != undefined ? lastname : user.lastname,
-                user.email,
-                password != undefined ? password : user.password,
-                phone != undefined ? phone : user.phone,
-                birthdate != undefined ? birthdate : user.birthdate,
-                city != undefined ? city : user.city,
-                country != undefined ? country : user.country,
-                photo != undefined ? photo : user.photo,
-                category != undefined ? category : user.category,
-                isAdmin != undefined ? isAdmin : user.isAdmin,
-                userId
-            ], (error, result)=> {
-                if (error) {
-                    res.status(400).json({ error: error, message: errorMessage.errorUpdateUser })
-                } else {
-                    res.status(201).json({result: result, message: "la modification de l'utilisateur est prise en compte!"})
-                }
-            })
+    const { gender, firstname, lastname, email, password, phone, birthdate, city, country, photo, category} = req.body;
+    dbConnect.query(usersService.getUserById, [userId], (err, result)=> {
+        if (err) {
+            console.log({error: err} +" tt")
+            res.status(401).json({ error: err, message: errorMessage.errorUserNotExist })
         } else{
-            res.status(400).json({ error: error, message: errorMessage.errorUserNotExist })
+            dbConnect.query(usersService.updateUser,[gender,firstname,lastname,email,password,phone,birthdate,city,country,photo,category,userId],(error, results)=> {
+                if (error) {
+                    res.status(401).json({ error: error, message: errorMessage.errorUpdateUser })
+                } else {
+                    res.status(201).json({message: "la modification de l'utilisateur est prise en compte!"})
+                }
+            })  
         }
     })
 }
